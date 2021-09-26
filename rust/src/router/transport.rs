@@ -148,7 +148,7 @@ pub(super) enum TransportType {
 /// * [`DirectTransport`](crate::direct_transport::DirectTransport)
 ///
 /// For additional methods see [`TransportGeneric`].
-#[async_trait(?Send)]
+#[async_trait]
 pub trait Transport: Debug + Send + Sync + private::CloneTransport {
     /// Transport id.
     #[must_use]
@@ -281,13 +281,13 @@ impl Clone for Box<dyn Transport> {
 }
 
 /// Generic transport trait with methods available on all transports in addition to [`Transport`].
-#[async_trait(?Send)]
+#[async_trait]
 pub trait TransportGeneric: Transport + Clone + 'static {
     /// Dump data structure specific to each transport.
     #[doc(hidden)]
-    type Dump: Debug + DeserializeOwned + 'static;
+    type Dump: Send + Sync + Debug + DeserializeOwned + 'static;
     /// Stats data structure specific to each transport.
-    type Stat: Debug + DeserializeOwned + 'static;
+    type Stat: Send + Sync + Debug + DeserializeOwned + 'static;
 
     /// Dump Transport.
     async fn dump(&self) -> Result<Self::Dump, RequestError>;
@@ -359,7 +359,7 @@ pub enum ConsumeDataError {
     Request(RequestError),
 }
 
-#[async_trait(?Send)]
+#[async_trait]
 pub(super) trait TransportImpl: TransportGeneric {
     fn router(&self) -> &Router;
 
